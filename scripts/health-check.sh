@@ -2,6 +2,13 @@
 set -euo pipefail
 
 echo "=== ClawOSS Health Check ==="
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+source "$SCRIPT_DIR/lib/openclaw-cli.sh"
+
+if ! ensure_openclaw_cli; then
+    echo "[FAIL] openclaw CLI not found (set OPENCLAW_JS_PATH or add openclaw to PATH)"
+    exit 1
+fi
 
 # Check gateway
 if openclaw gateway status 2>/dev/null | grep -q "running\|reachable"; then

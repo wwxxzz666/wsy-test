@@ -15,14 +15,15 @@ PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 WORKSPACE_DIR="$PROJECT_DIR/workspace"
 DEPLOYED_CONFIG="$HOME/.openclaw/openclaw.json"
 GATEWAY_PLIST="$HOME/Library/LaunchAgents/ai.openclaw.gateway.plist"
+source "$SCRIPT_DIR/lib/openclaw-cli.sh"
 
 # ── 0. Preflight checks ──────────────────────────────────────────────
 MISSING=()
 command -v python3 &>/dev/null || MISSING+=("python3")
 command -v gh       &>/dev/null || MISSING+=("gh")
 command -v jq       &>/dev/null || MISSING+=("jq")
-command -v openclaw &>/dev/null || MISSING+=("openclaw")
 command -v node     &>/dev/null || MISSING+=("node")
+ensure_openclaw_cli || MISSING+=("openclaw")
 
 if [ ${#MISSING[@]} -gt 0 ]; then
     echo "[FAIL] Missing required tools: ${MISSING[*]}"

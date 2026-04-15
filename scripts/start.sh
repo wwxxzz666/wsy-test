@@ -7,6 +7,12 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 AGENT_ID="clawoss"
 WORKSPACE_DIR="$PROJECT_DIR/workspace"
+source "$SCRIPT_DIR/lib/openclaw-cli.sh"
+
+if ! ensure_openclaw_cli; then
+    echo "Error: openclaw CLI not found. Set OPENCLAW_JS_PATH or install openclaw in PATH."
+    exit 1
+fi
 
 # Load .env if present
 if [ -f "$PROJECT_DIR/.env" ]; then

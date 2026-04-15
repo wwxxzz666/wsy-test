@@ -11,6 +11,10 @@
 #
 # Usage: nohup bash scripts/dashboard-sync.sh > /tmp/dashboard-sync.log 2>&1 &
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+source "$SCRIPT_DIR/lib/openclaw-cli.sh"
+ensure_openclaw_cli || true
+
 URL="${DASHBOARD_URL:-https://clawoss-dashboard.vercel.app}"
 KEY="${CLAW_API_KEY:?Set CLAW_API_KEY env var}"
 ACTIVE_MODEL="${CLAWOSS_MODEL_PRIMARY:-unknown}"

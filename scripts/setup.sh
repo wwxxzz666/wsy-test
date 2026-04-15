@@ -7,14 +7,15 @@ echo "=== ClawOSS Setup ==="
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 WORKSPACE_DIR="$PROJECT_DIR/workspace"
+source "$SCRIPT_DIR/lib/openclaw-cli.sh"
 
 # Check prerequisites
 echo "Checking prerequisites..."
-command -v openclaw >/dev/null 2>&1 || { echo "Error: openclaw not found. Install: npm i -g openclaw"; exit 1; }
 command -v gh >/dev/null 2>&1 || { echo "Error: gh not found. Install: brew install gh"; exit 1; }
 command -v node >/dev/null 2>&1 || { echo "Error: node not found. Install Node.js"; exit 1; }
 command -v python3 >/dev/null 2>&1 || { echo "Error: python3 not found. Install Python 3"; exit 1; }
 command -v jq >/dev/null 2>&1 || { echo "Error: jq not found. Install: brew install jq"; exit 1; }
+ensure_openclaw_cli || { echo "Error: openclaw CLI not found. Set OPENCLAW_JS_PATH (or install openclaw in PATH)."; exit 1; }
 echo "[OK] All prerequisites found"
 
 # Load .env for API keys

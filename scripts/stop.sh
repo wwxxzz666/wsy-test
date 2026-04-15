@@ -5,6 +5,11 @@ echo "=== Stopping ClawOSS ==="
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+source "$SCRIPT_DIR/lib/openclaw-cli.sh"
+
+if ! ensure_openclaw_cli; then
+    echo "Warning: openclaw CLI not found; cron removal via openclaw may fail."
+fi
 
 # Remove ClawOSS cron jobs (don't stop the gateway — other agents may be running)
 echo "Removing ClawOSS cron jobs..."
