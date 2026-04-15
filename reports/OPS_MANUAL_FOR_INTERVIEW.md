@@ -1,4 +1,4 @@
-# ClawOSS 操作手册（提交给面试官）
+# ClawOSS 操作手册
 
 ## 1. 文档目的
 
@@ -6,15 +6,15 @@
 
 1. 通过环境变量配置任意主流大模型（不写死模型）。
 2. 设置 token 总预算并在超限时自动暂停。
-3. Dashboard 可观测系统运行状态与预算状态。
-4. 全流程通用化，不依赖写死流程。
+3.仪表板可监测系统运行状态与预算状态。
+ 全流程通用化，不依赖写死流程。
 
 ---
 
 ## 2. 环境要求
 
-- OS: Ubuntu 22.04+
-- Git, curl, jq, gh, python3
+-操作系统：Ubuntu 22.04+
+-Git、curl、jq、gh、python3
 - Node.js 22+
 - OpenClaw CLI（`openclaw --version` 可用）
 
