@@ -1,0 +1,128 @@
+{
+  "agents": {
+    "defaults": {
+      "compaction": {
+        "mode": "safeguard",
+        "reserveTokens": 130000,
+        "keepRecentTokens": 15000,
+        "maxHistoryShare": 0.35,
+        "recentTurnsPreserve": 3,
+        "identifierPolicy": "strict",
+        "qualityGuard": {
+          "enabled": true,
+          "maxRetries": 2
+        },
+        "memoryFlush": {
+          "enabled": true,
+          "softThresholdTokens": 30000,
+          "prompt": "Before compaction, write current state to workspace files: 1) Active sub-agents and their repos to memory/impl-spawn-state.md, 2) PR follow-up queue to memory/pr-followup-state.md, 3) Work queue status to memory/work-queue.md, 4) Any pending scout reports. Then compact."
+        },
+        "postCompactionSections": [
+          "Orchestrator + Sub-Agent Architecture",
+          "Safety Defaults",
+          "Context Rot Prevention"
+        ]
+      },
+      "model": {
+        "primary": "openrouter/openai/gpt-4.1-mini",
+        "fallbacks": []
+      },
+      "subagents": {
+        "model": "openrouter/openai/gpt-4.1-mini",
+        "maxConcurrent": 14,
+        "archiveAfterMinutes": 1440,
+        "maxChildrenPerAgent": 15,
+        "maxSpawnDepth": 2,
+        "announceTimeoutMs": 5000
+      }
+    },
+    "list": [
+      {
+        "id": "clawoss",
+        "default": true,
+        "name": "ClawOSS",
+        "workspace": "__WORKSPACE_PATH__",
+        "model": "openrouter/openai/gpt-4.1-mini",
+        "tools": {
+          "profile": "coding"
+        },
+        "humanDelay": {
+          "mode": "off"
+        },
+        "heartbeat": {
+          "every": "5m",
+          "model": "openrouter/openai/gpt-4.1-mini",
+          "session": "main",
+          "target": "none",
+          "prompt": "You are autonomous. Read HEARTBEAT.md and execute EVERY step 0-7. Do NOT just reply HEARTBEAT_OK.\n\nGOAL: MERGED PRs. Not submitted PRs \u2014 MERGED. A PR that never gets reviewed is zero output.\n\nPRIORITY ORDER (follow this EVERY cycle):\n1. NEW PRs FIRST: Fill all 10 impl slots with new implementations. Discover issues, triage, spawn.\n2. FOLLOW-UPS ONLY AFTER all 10 slots are full or no new work exists.\n3. The PR Monitor (always-on) handles simple follow-ups automatically. Main agent focuses on NEW work.\n\nTRUST-BUILDING: Stop spray-and-pray. Focus on 10-15 repos where we build reputation. Return to repos that merged our PRs. A repo that merged your PR is 10x more likely to merge the next one.\n\nFINDING REPOS: Discover target repos using CRITERIA, not a hardcoded list. Stars >= 200, active development, merge velocity > 0, review rate > 50%, open PRs < 50. Search: 'topic:llm/agent/rag/ai' + 'label:bug/help-wanted'. Check trusted repos FIRST.\n\nPR TYPES: Bug fixes, docs fixes, typo fixes, test additions. NOT features or refactors.\nMIX: 60% easy wins (docs, typos, tests) + 40% bug fixes. A merged typo fix > an unreviewed bug fix.\n\nCLA REPOS: CLAs require manual signing. Do not attempt to sign CLAs.\n\nQUALITY: Understand codebase deeply. Trace root causes. Read .github/workflows/. Target 25-100 LOC (max 200). PR descriptions: write like a human developer, not an AI. No 'This PR addresses...', 'Upon investigation...', 'I identified...'. Jump straight to what's broken and what you did.\n\nSUPERSESSION CHECK: Before starting ANY issue, check: is it assigned? Does it have linked PRs from other contributors? If yes, SKIP \u2014 working on superseded issues wastes cycles and annoys maintainers.\n\nDEDUP: Check for spawned_pending and lock files before spawning. Multiple PRs per repo is fine. ALWAYS use 'BillionClaw' explicitly \u2014 NEVER use @me. New PRs get priority over follow-ups. No daily caps \u2014 ship as many quality PRs as possible.\n\nFOLLOW UP on open PRs \u2014 bump stale ones, respond to reviews, merge approved ones.\n\nSCORING: Use P(merge) 0-100 weighted formula for prioritization. P(merge) >= 30 to attempt, >= 60 for priority spawning. Sort work queue by P(merge) descending. 10 impl/followup slots + 4 always-on (scout, PR monitor scan, PR monitor deep, PR analyst) = 14 total. NEVER reply HEARTBEAT_OK — there is ALWAYS work to do. If queue is empty, run discovery. If discovery finds nothing, check follow-ups. If no follow-ups, expand to new niches. The agent must ALWAYS be working on something.\n\nWEB SEARCH: You have web_search and web_fetch tools (Perplexity). Use them aggressively — search before implementing, search when stuck, search to validate approaches. 5-10 searches per cycle minimum.\n\nIf work exists, DO IT. NEVER idle. NEVER reply HEARTBEAT_OK. There is ALWAYS something to do.",
+          "lightContext": false
+        }
+      }
+    ]
+  },
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "openrouter": {
+        "baseUrl": "https://openrouter.ai/api/v1",
+        "apiKey": "${CLAWOSS_LLM_API_KEY}",
+        "api": "openai-completions",
+        "authHeader": true,
+        "models": [
+          {
+            "id": "openai/gpt-4.1-mini",
+            "name": "GPT-4.1 Mini",
+            "reasoning": true,
+            "input": ["text"],
+            "cost": { "input": 0.4, "output": 1.6 },
+            "contextWindow": 1048576,
+            "maxTokens": 32768
+          }
+        ]
+      }
+    }
+  },
+  "gateway": {
+    "port": 18789,
+    "mode": "local"
+  },
+  "messages": {
+    "queue": {
+      "mode": "steer",
+      "debounceMs": 500,
+      "cap": 10
+    }
+  },
+  "tools": {
+    "sessions_spawn": {
+      "attachments": {
+        "enabled": true
+      }
+    },
+    "web": {
+      "search": {
+        "enabled": true,
+        "provider": "perplexity"
+      },
+      "fetch": {
+        "enabled": true
+      }
+    },
+    "exec": {
+      "applyPatch": {
+        "enabled": true
+      }
+    },
+    "loopDetection": {
+      "enabled": true
+    }
+  },
+  "skills": {
+    "load": {
+      "watch": true
+    }
+  },
+  "logging": {
+    "level": "info"
+  }
+}

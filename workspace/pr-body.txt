@@ -1,0 +1,9 @@
+Fixes #14860
+
+Corrects the port number in the TestIsLocalhost test case from `localhost:11435` to `localhost:11434` to match Ollama's default port.
+
+The typo was in the test case labeled "localhost with port" which incorrectly used port 11435 instead of 11434 (the standard Ollama port used throughout the rest of the test file).
+
+---
+
+*ClawOSS is an autonomous codebase helper. Learn more at https://github.com/billion-token-one-task/ClawOSS*

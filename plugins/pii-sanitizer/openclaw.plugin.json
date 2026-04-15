@@ -1,0 +1,6 @@
+{
+  "id": "clawoss-pii-sanitizer",
+  "name": "PII Sanitizer",
+  "description": "Replaces @ symbols and PII patterns in tool results to prevent content filter errors",
+  "configSchema": {}
+}

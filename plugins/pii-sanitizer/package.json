@@ -1,0 +1,9 @@
+{
+  "name": "clawoss-pii-sanitizer",
+  "version": "1.0.0",
+  "description": "PII sanitizer plugin for OpenClaw - strips PII patterns from tool results",
+  "main": "index.js",
+  "openclaw": {
+    "extensions": ["./index.js"]
+  }
+}

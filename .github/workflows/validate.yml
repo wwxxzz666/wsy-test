@@ -1,0 +1,109 @@
+name: Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate-config:
+    name: Validate Configuration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Validate openclaw.json
+        run: node -e "JSON.parse(require('fs').readFileSync('config/openclaw.json', 'utf8'))"
+
+      - name: Validate cron-jobs.json
+        run: node -e "JSON.parse(require('fs').readFileSync('config/cron-jobs.json', 'utf8'))"
+
+      - name: Validate workspace files exist
+        run: |
+          for f in AGENTS.md SOUL.md USER.md IDENTITY.md TOOLS.md HEARTBEAT.md BOOTSTRAP.md MEMORY.md; do
+            if [ ! -f "workspace/$f" ]; then
+              echo "Missing workspace/$f"
+              exit 1
+            fi
+          done
+          echo "All workspace files present"
+
+      - name: Validate skill definitions
+        run: |
+          SKILLS="oss-discover oss-implement oss-review oss-submit oss-followup oss-triage repo-analyzer context-manager dashboard-reporter safety-checker"
+          for skill in $SKILLS; do
+            SKILL_FILE="workspace/skills/$skill/SKILL.md"
+            if [ ! -f "$SKILL_FILE" ]; then
+              echo "Missing $SKILL_FILE"
+              exit 1
+            fi
+            # Check frontmatter exists (starts with ---)
+            if ! head -1 "$SKILL_FILE" | grep -q "^---"; then
+              echo "$SKILL_FILE missing YAML frontmatter"
+              exit 1
+            fi
+            # Check name field exists
+            if ! grep -q "^name:" "$SKILL_FILE"; then
+              echo "$SKILL_FILE missing 'name' field"
+              exit 1
+            fi
+            # Check description field exists
+            if ! grep -q "^description:" "$SKILL_FILE"; then
+              echo "$SKILL_FILE missing 'description' field"
+              exit 1
+            fi
+            # Check size limit (2000 chars)
+            CHARS=$(wc -c < "$SKILL_FILE")
+            if [ "$CHARS" -gt 2000 ]; then
+              echo "$SKILL_FILE exceeds 2000 char limit ($CHARS chars)"
+              exit 1
+            fi
+            echo "$skill: OK ($CHARS chars)"
+          done
+
+      - name: Validate scripts are executable
+        run: |
+          for f in scripts/*.sh; do
+            if [ ! -x "$f" ]; then
+              echo "$f is not executable"
+              exit 1
+            fi
+          done
+          echo "All scripts executable"
+
+      - name: Run config validation script
+        run: node scripts/validate-config.mjs
+
+  validate-dashboard:
+    name: Validate Dashboard Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: dashboard
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+        env:
+          TURSO_DATABASE_URL: "file:local.db"
+          TURSO_AUTH_TOKEN: "test"
+          CLAW_API_KEY: "test"
+          GITHUB_TOKEN: "test"
+          CLAW_AGENT_USERNAME: "BillionClaw"
+          NEXT_PUBLIC_APP_URL: "http://localhost:3000"

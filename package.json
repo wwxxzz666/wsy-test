@@ -1,0 +1,23 @@
+{
+  "name": "clawoss",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The best OpenClaw agent configuration for autonomous OSS development",
+  "workspaces": ["dashboard"],
+  "scripts": {
+    "setup": "bash scripts/setup.sh",
+    "start": "bash scripts/start.sh",
+    "stop": "bash scripts/stop.sh",
+    "restart": "bash scripts/restart.sh",
+    "health": "bash scripts/health-check.sh",
+    "dashboard:dev": "cd dashboard && npm run dev",
+    "dashboard:build": "cd dashboard && npm run build",
+    "validate": "node scripts/validate-config.mjs",
+    "acceptance:evidence": "bash scripts/export-acceptance-evidence.sh"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/billion-token-one-task/ClawOSS.git"
+  }
+}
